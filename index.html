@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Тренировки</title>
+<style>
+:root{
+  --bg:#E6E9E4;
+  --surface:#FFFFFF;
+  --ink:#1B2420;
+  --muted:#6A736E;
+  --line:#D3D9D2;
+  --sage:#34503F;
+  --sage-soft:#DAE4DB;
+  --plate:#E3B23C;
+  --danger:#A6412F;
+  --font: ui-rounded, "SF Pro Rounded", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);-webkit-font-smoothing:antialiased}
+body{min-height:100vh;padding-bottom:calc(88px + env(safe-area-inset-bottom))}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;padding:0}
+input{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--sage);outline-offset:2px}
+.num{font-variant-numeric:tabular-nums}
+main{max-width:560px;margin:0 auto;padding:18px 16px 24px}
+h1{font-size:32px;font-weight:700;letter-spacing:-.02em;margin:10px 0 16px}
+h2{font-size:18px;font-weight:650;margin:0;line-height:1.25}
+.sub{color:var(--muted);font-size:14px;line-height:1.35}
+.lead{color:var(--muted);font-size:16px;margin:0 0 14px;line-height:1.4}
+
+/* Hero: live tonnage */
+.hero{background:var(--ink);color:#EEF1EC;border-radius:26px;padding:18px 20px 20px;margin-bottom:14px}
+.hero-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.hero-plan{font-size:17px;font-weight:650}
+.hero-date{font-size:14px;color:#A7B0AA;margin-top:2px}
+.hero .link{color:#A7B0AA;font-size:14px;padding:4px 0}
+.ton{font-size:58px;font-weight:700;letter-spacing:-.035em;line-height:1;margin-top:22px}
+.ton small{font-size:22px;font-weight:600;letter-spacing:0;color:#A7B0AA;margin-left:6px}
+.ton-meta{display:flex;justify-content:space-between;font-size:14px;color:#A7B0AA;margin-top:8px}
+.bar{height:6px;border-radius:3px;background:rgba(255,255,255,.14);margin-top:14px;overflow:hidden}
+.bar-fill{height:100%;background:var(--plate);border-radius:3px;transition:width .3s ease}
+.ton-prev{font-size:13px;color:#A7B0AA;margin-top:6px}
+
+/* Exercise card */
+.ex{background:var(--surface);border-radius:22px;padding:16px;margin-bottom:12px}
+.ex-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.ex-ton{font-size:16px;font-weight:650;white-space:nowrap;padding-top:1px}
+.last{font-size:14px;color:var(--sage);background:var(--sage-soft);border-radius:10px;padding:7px 10px;margin-top:10px;display:inline-block}
+.ex-links{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px}
+.ex-links .last{margin-top:0}
+.vid{display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:600;color:#fff;background:var(--ink);padding:7px 12px;border-radius:10px;text-decoration:none}
+.vid::before{content:"";width:0;height:0;border-left:7px solid currentColor;border-top:4.5px solid transparent;border-bottom:4.5px solid transparent}
+.vid.plain{background:var(--bg);color:var(--ink);font-weight:500}
+.vid.plain::before{display:none}
+.vid-edit{display:flex;gap:8px;width:100%}
+.vid-edit input{flex:1;min-width:0;height:48px;border-radius:12px;border:1.5px solid var(--sage);background:#fff;padding:0 12px;font-size:16px;outline:none}
+.pe-link{width:100%;height:42px;margin-top:12px;border-radius:12px;border:1.5px solid transparent;background:var(--bg);padding:0 12px;font-size:15px;outline:none}
+.pe-link:focus{border-color:var(--sage);background:#fff}
+.set-head,.set{display:grid;grid-template-columns:40px 1fr 1fr 52px;gap:8px;align-items:center}
+.set-head{font-size:12px;color:var(--muted);margin:14px 0 6px;text-align:center}
+.set{margin-bottom:8px}
+.set-n{width:40px;height:48px;border-radius:12px;background:var(--bg);display:grid;place-items:center;font-weight:650}
+.cell{width:100%;height:48px;border-radius:12px;border:1.5px solid transparent;background:var(--bg);text-align:center;font-size:19px;font-weight:600;outline:none;-webkit-appearance:none;appearance:none}
+.cell:focus{border-color:var(--sage);background:#fff}
+.cell::placeholder{color:#9CA59F;font-weight:500}
+.check{width:52px;height:48px;border-radius:12px;border:1.5px solid var(--line);display:grid;place-items:center;color:#B4BCB6;transition:background .15s,color .15s}
+.set.done .set-n{background:var(--sage);color:#fff}
+.set.done .cell{background:var(--sage-soft)}
+.set.done .check{background:var(--sage);border-color:var(--sage);color:#fff}
+.ex-actions{display:flex;gap:8px;margin-top:4px;flex-wrap:wrap}
+.chip{font-size:14px;padding:8px 12px;border-radius:999px;background:var(--bg);color:var(--ink)}
+.chip.warn{color:var(--danger)}
+
+/* Buttons */
+.primary{display:block;width:100%;background:var(--sage);color:#fff;font-size:17px;font-weight:650;padding:16px;border-radius:16px;text-align:center}
+.primary.sm{width:auto;padding:0 16px;font-size:15px;border-radius:12px;height:48px;flex-shrink:0}
+.ghost-btn{display:block;width:100%;padding:15px;border-radius:16px;border:1.5px solid var(--line);font-size:16px;font-weight:600;text-align:center;margin-top:10px}
+.danger-link{display:block;width:100%;padding:14px;color:var(--danger);font-size:15px;text-align:center;margin-top:8px}
+.danger-link.armed{background:#F3E1DC;border-radius:14px;font-weight:650}
+.stack{display:grid;gap:10px;margin-top:6px}
+
+/* Add row */
+.add-row{display:flex;gap:8px;background:var(--surface);border-radius:18px;padding:10px;margin:4px 0 14px}
+.add-row input{flex:1;min-width:0;height:48px;border-radius:12px;border:1.5px solid transparent;background:var(--bg);padding:0 14px;font-size:16px;outline:none}
+.add-row input:focus{border-color:var(--sage);background:#fff}
+
+/* Plan list (start) */
+.plan-list{display:grid;gap:10px}
+.plan-btn{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;text-align:left;background:var(--surface);border-radius:20px;padding:16px 16px 16px 18px}
+.pb-name{display:block;font-size:18px;font-weight:650;margin-bottom:3px}
+.pill{flex-shrink:0;background:var(--ink);color:#fff;font-size:14px;font-weight:600;padding:9px 14px;border-radius:999px}
+.done-card{background:var(--sage);color:#fff;border-radius:22px;padding:18px 20px;margin-bottom:18px}
+.done-card .sub{color:#CFDCD2}
+.done-n{font-size:40px;font-weight:700;letter-spacing:-.03em;margin:6px 0 4px}
+
+/* Plan editor */
+.back{display:inline-flex;align-items:center;gap:4px;color:var(--sage);font-size:16px;font-weight:600;padding:6px 0;margin-top:4px}
+.title-input{width:100%;font-size:28px;font-weight:700;letter-spacing:-.02em;border:0;border-bottom:1.5px solid var(--line);background:transparent;padding:8px 0;margin:8px 0 16px;outline:none}
+.title-input:focus{border-color:var(--sage)}
+.pe{background:var(--surface);border-radius:20px;padding:14px;margin-bottom:10px}
+.pe-top{display:flex;gap:8px;align-items:center}
+.pe-name{flex:1;min-width:0;font-size:17px;font-weight:650;border:0;border-bottom:1.5px solid transparent;padding:6px 0;outline:none;background:transparent}
+.pe-name:focus{border-color:var(--sage)}
+.tool{width:36px;height:36px;border-radius:10px;background:var(--bg);display:grid;place-items:center;color:var(--muted);flex-shrink:0}
+.tool.x{color:var(--danger)}
+.pe-bottom{display:flex;gap:16px;margin-top:10px;flex-wrap:wrap}
+.pe-group{display:grid;gap:6px}
+.stepper{display:flex;align-items:center;background:var(--bg);border-radius:12px;height:44px}
+.stepper button{width:44px;height:44px;font-size:22px;color:var(--sage)}
+.stepper span{min-width:26px;text-align:center;font-size:18px;font-weight:650}
+.range{display:flex;align-items:center;gap:6px}
+.cell.sm{width:60px;height:44px;font-size:17px}
+.plan-card{display:block;width:100%;text-align:left;background:var(--surface);border-radius:20px;padding:16px 18px}
+.plan-card .sub{margin-top:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+
+/* History */
+.hist{background:var(--surface);border-radius:20px;margin-bottom:10px;overflow:hidden}
+.hist-head{display:flex;justify-content:space-between;align-items:center;gap:12px;width:100%;text-align:left;padding:16px 18px}
+.h-date{font-size:17px;font-weight:650;margin-bottom:2px}
+.h-ton{font-size:20px;font-weight:700;white-space:nowrap}
+.h-body{border-top:1px solid var(--line);padding:6px 18px 12px}
+.h-ex{padding:10px 0;border-bottom:1px solid var(--bg)}
+.h-ex:last-of-type{border-bottom:0}
+.h-ex-top{display:flex;justify-content:space-between;gap:10px;font-weight:600}
+.h-sets{font-size:15px;color:var(--muted);margin-top:3px}
+.month{font-size:14px;color:var(--muted);margin:18px 4px 8px}
+.month:first-of-type{margin-top:0}
+
+/* Tab bar */
+.tabs{position:fixed;left:0;right:0;bottom:0;background:rgba(255,255,255,.94);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom);z-index:10}
+.tabs-in{max-width:560px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr)}
+.tab{height:62px;font-size:15px;font-weight:600;color:var(--muted);position:relative}
+.tab.on{color:var(--ink)}
+.tab.on::after{content:"";position:absolute;top:0;left:50%;width:28px;margin-left:-14px;height:3px;border-radius:0 0 3px 3px;background:var(--sage)}
+
+.toast{position:fixed;left:16px;right:16px;bottom:calc(76px + env(safe-area-inset-bottom));max-width:528px;margin:0 auto;background:var(--danger);color:#fff;padding:12px 16px;border-radius:14px;font-size:15px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:20}
+.toast.show{opacity:1}
+.notice{background:#F3E1DC;color:var(--danger);border-radius:16px;padding:12px 14px;font-size:14px;line-height:1.4;margin-bottom:12px}
+.backup{margin-top:28px;padding:18px;background:var(--surface);border-radius:22px}
+.backup h2{margin-bottom:4px}
+.backup-btns{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 4px}
+.backup-text{width:100%;min-height:120px;margin:10px 0;border-radius:12px;border:1.5px solid var(--line);background:var(--bg);padding:10px;font-size:13px;font-family:ui-monospace,Menlo,monospace;resize:vertical}
+.toast.good{background:var(--sage)}
+.loading{padding:60px 0;text-align:center;color:var(--muted)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
+<main id="app"><div class="loading">Загружаю данные…</div></main>
+
+<nav class="tabs" aria-label="Разделы">
+  <div class="tabs-in">
+    <button class="tab on" data-act="tab" data-tab="workout">Тренировка</button>
+    <button class="tab" data-act="tab" data-tab="plans">Планы</button>
+    <button class="tab" data-act="tab" data-tab="history">История</button>
+  </div>
+</nav>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+const KEY = 'gym-log-v1';
+let state = { plans: [], sessions: [], activeId: null };
+let tab = 'workout';
+let ui = { videoEdit: null, focusVid: false, editingPlanId: null, openSession: null, finishedId: null, confirm: null, resetScroll: false };
+
+const uid = () => Math.random().toString(36).slice(2, 9) + Date.now().toString(36);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const fmt = n => (Math.round((n || 0) * 10) / 10).toLocaleString('ru-RU', { maximumFractionDigits: 1 });
+const inVal = n => n == null ? '' : String(n).replace('.', ',');
+const parseNum = v => { const n = parseFloat(String(v).replace(',', '.').replace(/\s/g, '')); return isNaN(n) ? null : n; };
+const plural = (n, f) => { const a = Math.abs(n) % 100, b = a % 10; if (a > 10 && a < 20) return f[2]; if (b > 1 && b < 5) return f[1]; if (b === 1) return f[0]; return f[2]; };
+const longDate = ts => new Date(ts).toLocaleDateString('ru-RU', { weekday: 'short', day: 'numeric', month: 'long' });
+const shortDate = ts => new Date(ts).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
+const norm = s => String(s || '').trim().toLowerCase().replace(/ё/g, 'е');
+
+const icoCheck = '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const icoBack = '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const icoUp = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M6 15l6-6 6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const icoDown = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const icoX = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M7 7l10 10M17 7L7 17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>';
+
+/* ---------- Хранение: облако Телеграма + запасная копия на телефоне ---------- */
+const TG = (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData) ? window.Telegram.WebApp : null;
+const CS = (TG && TG.isVersionAtLeast && TG.isVersionAtLeast('6.9')) ? TG.CloudStorage : null;
+const CHUNK = 2000;            // облако хранит строки до 4096 символов — режем с запасом
+const LOCAL_KEY = 'gym-log-backup';
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+let lastChunks = [];
+let cloudWritable = false;
+
+const cs = {
+  get: keys => new Promise((res, rej) => CS.getItems(keys, (err, r) => err ? rej(new Error(String(err))) : res(r || {}))),
+  set: (k, v) => new Promise((res, rej) => CS.setItem(k, v, (err, ok) => err ? rej(new Error(String(err))) : res(ok))),
+  remove: keys => new Promise((res, rej) => CS.removeItems(keys, (err, ok) => err ? rej(new Error(String(err))) : res(ok)))
+};
+function localGet() { try { return localStorage.getItem(LOCAL_KEY); } catch (e) { return null; } }
+function localSet(v) { try { localStorage.setItem(LOCAL_KEY, v); } catch (e) { } }
+
+async function readCloud() {
+  const m = await cs.get(['meta']);
+  if (!m.meta) return '';                       // первый запуск: в облаке пусто
+  const meta = JSON.parse(m.meta);
+  const keys = Array.from({ length: meta.n }, (_, i) => 'd' + i);
+  const parts = {};
+  for (let i = 0; i < keys.length; i += 50) Object.assign(parts, await cs.get(keys.slice(i, i + 50)));
+  const chunks = keys.map(k => parts[k] || '');
+  const str = chunks.join('');
+  if (str.length !== meta.len) { const e = new Error('данные в облаке неполные'); e.partial = true; throw e; }
+  lastChunks = chunks;
+  return str;
+}
+
+async function load() {
+  let str = null;
+  if (CS) {
+    for (let a = 0; a < 2; a++) {
+      try { str = await readCloud(); cloudWritable = true; break; }
+      catch (e) {
+        if (e.partial) {
+          // запись прервалась на полпути — берём полную копию с телефона и чиним облако
+          if (localGet()) { cloudWritable = true; lastChunks = []; }
+          else ui.notice = 'Данные в облаке Телеграма повреждены. Восстановите их из резервной копии во вкладке «История»';
+          break;
+        }
+        if (a === 1) ui.notice = 'Нет связи с облаком Телеграма (' + e.message + '). Показываю данные с этого телефона, в облако ничего не запишется. Закройте и откройте приложение, когда появится интернет';
+        else await sleep(1000);
+      }
+    }
+  } else {
+    ui.notice = 'Приложение открыто не из Телеграма, поэтому данные сохраняются только в этом браузере';
+  }
+  if (!str) str = localGet();
+  if (str) {
+    try { state = Object.assign(state, JSON.parse(str)); }
+    catch (e) { ui.notice = 'Сохранённые данные не читаются. Восстановите их из резервной копии во вкладке «История»'; }
+  }
+  applyProgram();
+  render();
+  if (cloudWritable && str && !lastChunks.length) save();   // починка облака после прерванной записи
+}
+
+let saveTimer = null, saving = false, dirty = false, failed = false;
+function save() {
+  dirty = true;
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(flush, 1000);
+}
+async function flush() {
+  if (saving || !dirty) return;
+  saving = true; dirty = false;
+  const str = JSON.stringify(state);
+  localSet(str);
+  let ok = true, err = '';
+  if (CS && cloudWritable) {
+    ok = false;
+    const chunks = [];
+    for (let i = 0; i < str.length; i += CHUNK) chunks.push(str.slice(i, i + CHUNK));
+    for (let a = 0; a < 3 && !ok; a++) {
+      try {
+        for (let i = 0; i < chunks.length; i++) {
+          if (lastChunks[i] !== chunks[i]) { await cs.set('d' + i, chunks[i]); lastChunks[i] = chunks[i]; }
+        }
+        await cs.set('meta', JSON.stringify({ n: chunks.length, len: str.length, t: Date.now() }));
+        if (lastChunks.length > chunks.length) {
+          const extra = [];
+          for (let i = chunks.length; i < lastChunks.length; i++) extra.push('d' + i);
+          await cs.remove(extra);
+        }
+        lastChunks = chunks.slice();
+        ok = true;
+      } catch (e) { err = e.message || String(e); await sleep(1500 * (a + 1)); }
+    }
+  }
+  saving = false;
+  if (ok) { if (failed) toast('Сохранено', true); failed = false; }
+  else {
+    if (!failed) toast('Не удалось сохранить в Телеграм (' + err + '). Копия на телефоне есть, попробую ещё раз');
+    failed = true; dirty = true;
+  }
+  if (dirty) { clearTimeout(saveTimer); saveTimer = setTimeout(flush, ok ? 800 : 6000); }
+}
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden' && dirty) { clearTimeout(saveTimer); flush(); }
+});
+function toast(msg, good) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.toggle('good', !!good);
+  t.classList.add('show');
+  clearTimeout(t._h);
+  t._h = setTimeout(() => t.classList.remove('show'), good ? 2000 : 6000);
+}
+function backupView() {
+  return `<section class="backup">
+    <h2>Резервная копия</h2>
+    <p class="sub">Все планы, ссылки и история одним текстом. Сохраните его в Заметки или отправьте себе в «Избранное» раз в пару недель</p>
+    <div class="backup-btns">
+      <button class="chip" data-act="backup-copy">Скопировать копию</button>
+      <button class="chip" data-act="backup-open">${ui.restoreOpen ? 'Закрыть' : 'Восстановить из копии'}</button>
+    </div>
+    ${ui.copyFallback ? `<p class="sub">Выделите текст ниже и скопируйте вручную</p><textarea class="backup-text" readonly>${esc(JSON.stringify(state))}</textarea>` : ''}
+    ${ui.restoreOpen ? `<textarea id="restore-text" class="backup-text" placeholder="Вставьте сюда текст резервной копии"></textarea>
+      <button class="primary" data-act="backup-restore">${ui.confirm === 'restore' ? 'Нажмите ещё раз: текущие данные заменятся копией' : 'Восстановить'}</button>` : ''}
+  </section>`;
+}
+const PROGRAM = [];   // стартовых планов в коде нет: они загружаются из резервной копии
+function seed() { applyProgram(); }
+function applyProgram() {
+  if (state.programV >= 2) return;
+  // убрать старый пример «Ноги», если он не менялся
+  const sample = ['жим ногами', 'разгибание ног в тренажере', 'сгибание голени'];
+  state.plans = state.plans.filter(p => !(p.name === 'Ноги' && p.exercises.length === 3 && p.exercises.every((e, k) => norm(e.name) === sample[k])));
+  PROGRAM.forEach(pr => {
+    if (state.plans.some(p => norm(p.name) === norm(pr.name))) return;
+    state.plans.push({
+      id: uid(), name: pr.name,
+      exercises: pr.exercises.map(x => Array.isArray(x)
+        ? { id: uid(), name: x[0], sets: x[1], repsMin: x[2], repsMax: x[3] }
+        : { id: uid(), name: x, sets: 3, repsMin: 10, repsMax: 12 })
+    });
+  });
+  state.programV = 2;
+  save();
+}
+
+/* ---------- Data helpers ---------- */
+const active = () => state.sessions.find(s => s.id === state.activeId) || null;
+const plan = () => state.plans.find(p => p.id === ui.editingPlanId) || null;
+const setTon = st => st.done ? (st.w || 0) * (st.r || 0) : 0;
+const exTon = ex => ex.sets.reduce((a, st) => a + setTon(st), 0);
+const sessTon = s => s.exercises.reduce((a, ex) => a + exTon(ex), 0);
+const doneCount = s => s.exercises.reduce((a, ex) => a + ex.sets.filter(x => x.done).length, 0);
+const totalCount = s => s.exercises.reduce((a, ex) => a + ex.sets.length, 0);
+const finished = () => state.sessions.filter(s => s.finished).sort((a, b) => b.date - a.date);
+
+function lastFor(name, exclId) {
+  const n = norm(name);
+  for (const s of finished()) {
+    if (s.id === exclId) continue;
+    const ex = s.exercises.find(e => norm(e.name) === n);
+    if (ex) { const d = ex.sets.filter(x => x.done); if (d.length) return { date: s.date, sets: d }; }
+  }
+  return null;
+}
+function lastOfPlan(planId, exclId) {
+  if (!planId) return null;
+  return finished().find(s => s.planId === planId && s.id !== exclId) || null;
+}
+function placeholder(ex, j, sessId) {
+  const last = lastFor(ex.name, sessId);
+  const ref = last ? last.sets[Math.min(j, last.sets.length - 1)] : null;
+  const t = ex.target || {};
+  return {
+    w: ref && ref.w != null ? inVal(ref.w) : '',
+    r: ref && ref.r != null ? String(ref.r) : String(t.repsMax || t.repsMin || '')
+  };
+}
+function allNames() {
+  const m = new Map();
+  state.plans.forEach(p => p.exercises.forEach(e => e.name && m.set(norm(e.name), e.name)));
+  state.sessions.forEach(s => s.exercises.forEach(e => e.name && m.set(norm(e.name), e.name)));
+  return [...m.values()].sort((a, b) => a.localeCompare(b, 'ru'));
+}
+function targetText(t) {
+  if (!t || (!t.sets && !t.repsMin && !t.repsMax)) return '';
+  let reps = '';
+  if (t.repsMin && t.repsMax && t.repsMin !== t.repsMax) reps = t.repsMin + '–' + t.repsMax;
+  else reps = t.repsMin || t.repsMax || '';
+  return 'План: ' + (t.sets ? t.sets + ' × ' : '') + reps;
+}
+function safeUrl(u) {
+  u = String(u || '').trim();
+  if (!u) return '';
+  if (!/^https?:\/\//i.test(u)) u = 'https://' + u;
+  try { const x = new URL(u); return /^https?:$/.test(x.protocol) ? x.href : ''; } catch (e) { return ''; }
+}
+function videoUrl(name) {
+  const n = norm(name);
+  for (const p of state.plans) {
+    const e = p.exercises.find(x => norm(x.name) === n && x.video);
+    if (e) { const u = safeUrl(e.video); if (u) return u; }
+  }
+  return safeUrl((state.videos || {})[n]);
+}
+function setVideo(name, url) {
+  const n = norm(name);
+  url = String(url || '').trim();
+  state.videos = state.videos || {};
+  if (url) state.videos[n] = url; else delete state.videos[n];
+  state.plans.forEach(p => p.exercises.forEach(e => { if (norm(e.name) === n) e.video = url; }));
+}
+function videoLink(name, i) {
+  const url = videoUrl(name);
+  if (ui.videoEdit === i) {
+    return `<div class="vid-edit">
+      <input id="vid-input" type="url" inputmode="url" autocapitalize="off" autocorrect="off" enterkeyhint="done" data-ex="${i}" value="${esc(url)}" placeholder="Вставьте ссылку на видео" aria-label="Ссылка на видео">
+      <button class="primary sm" data-act="vid-save" data-ex="${i}">Сохранить</button>
+    </div>`;
+  }
+  if (url) return `<a class="vid" href="${esc(url)}" target="_blank" rel="noopener">Как выполнять</a>
+    <button class="vid plain" data-act="vid-edit" data-ex="${i}">Изменить ссылку</button>`;
+  return `<button class="vid plain" data-act="vid-edit" data-ex="${i}">Добавить видео</button>`;
+}
+function setsText(sets) {
+  return sets.map(x => (x.w ? fmt(x.w) + ' × ' : '') + (x.r ?? '–')).join(', ');
+}
+
+/* ---------- Views ---------- */
+function viewWorkout() {
+  const s = active();
+  if (!s) {
+    let h = '<h1>Тренировка</h1>';
+    const f = ui.finishedId && state.sessions.find(x => x.id === ui.finishedId);
+    if (f) {
+      const n = doneCount(f);
+      h += `<div class="done-card"><div>Тренировка сохранена</div><div class="done-n num">${fmt(sessTon(f))} кг</div><div class="sub">${esc(f.planName || 'Без плана')}, ${n} ${plural(n, ['подход', 'подхода', 'подходов'])}</div></div>`;
+    }
+    h += state.plans.length
+      ? '<p class="lead">Выберите план, чтобы начать</p>'
+      : '<p class="lead">Планов пока нет. Создайте их во вкладке «Планы» или вставьте резервную копию внизу вкладки «История»</p>';
+    h += '<div class="plan-list">' + state.plans.map(p => {
+      const last = lastOfPlan(p.id);
+      const n = p.exercises.length;
+      return `<button class="plan-btn" data-act="start" data-id="${p.id}">
+        <span><span class="pb-name">${esc(p.name || 'Без названия')}</span>
+        <span class="sub">${n} ${plural(n, ['упражнение', 'упражнения', 'упражнений'])}${last ? ', последний раз ' + shortDate(last.date) : ''}</span></span>
+        <span class="pill">Начать</span></button>`;
+    }).join('') + '</div>';
+    h += '<button class="ghost-btn" data-act="start-empty">Начать без плана</button>';
+    return h;
+  }
+
+  const ton = sessTon(s);
+  const prev = lastOfPlan(s.planId, s.id);
+  const prevTon = prev ? sessTon(prev) : 0;
+  let h = `<section class="hero" aria-live="polite">
+    <div class="hero-top">
+      <div><div class="hero-plan">${esc(s.planName || 'Без плана')}</div><div class="hero-date">${longDate(s.date)}</div></div>
+    </div>
+    <div class="ton num"><span id="ton-total">${fmt(ton)}</span><small>кг</small></div>
+    <div class="ton-meta"><span>тоннаж</span><span id="ton-sets">${doneCount(s)} из ${totalCount(s)} подходов</span></div>`;
+  if (prevTon) {
+    h += `<div class="bar"><div class="bar-fill" id="ton-bar" style="width:${Math.min(100, ton / prevTon * 100)}%"></div></div>
+      <div class="ton-prev" id="ton-prev">${prevText(ton, prevTon, prev.date)}</div>`;
+  }
+  h += '</section>';
+
+  s.exercises.forEach((ex, i) => {
+    const last = lastFor(ex.name, s.id);
+    const tgt = targetText(ex.target);
+    h += `<article class="ex">
+      <header class="ex-head">
+        <div><h2>${esc(ex.name)}</h2>${tgt ? `<div class="sub">${tgt}</div>` : ''}</div>
+        <div class="ex-ton num" id="exton-${i}">${fmt(exTon(ex))} кг</div>
+      </header>
+      <div class="ex-links">
+        ${last ? `<div class="last">Прошлый раз: ${setsText(last.sets)}</div>` : ''}
+        ${videoLink(ex.name, i)}
+      </div>
+      <div class="set-head"><span>№</span><span>Вес, кг</span><span>Повторы</span><span></span></div>`;
+    ex.sets.forEach((st, j) => {
+      const ph = placeholder(ex, j, s.id);
+      h += `<div class="set ${st.done ? 'done' : ''}">
+        <span class="set-n">${j + 1}</span>
+        <input class="cell num" inputmode="decimal" enterkeyhint="next" aria-label="Вес, подход ${j + 1}" data-field="w" data-ex="${i}" data-set="${j}" value="${inVal(st.w)}" placeholder="${ph.w}">
+        <input class="cell num" inputmode="numeric" enterkeyhint="done" aria-label="Повторы, подход ${j + 1}" data-field="r" data-ex="${i}" data-set="${j}" value="${st.r ?? ''}" placeholder="${ph.r}">
+        <button class="check" data-act="toggle-set" data-ex="${i}" data-set="${j}" aria-label="Подход ${j + 1} выполнен" aria-pressed="${st.done}">${icoCheck}</button>
+      </div>`;
+    });
+    const rmKey = 'rm-ex-' + i;
+    h += `<div class="ex-actions">
+        <button class="chip" data-act="add-set" data-ex="${i}">Добавить подход</button>
+        ${ex.sets.length > 1 ? `<button class="chip" data-act="rm-set" data-ex="${i}">Убрать подход</button>` : ''}
+        <button class="chip warn" data-act="rm-ex" data-ex="${i}">${ui.confirm === rmKey ? 'Точно убрать?' : 'Убрать упражнение'}</button>
+      </div></article>`;
+  });
+
+  h += `<div class="add-row"><input id="add-ex-input" list="ex-names" placeholder="Добавить упражнение" enterkeyhint="done"><button class="primary sm" data-act="add-ex">Добавить</button></div>
+    <div class="stack">
+      <button class="primary" data-act="finish">Завершить тренировку</button>
+      <button class="danger-link ${ui.confirm === 'cancel' ? 'armed' : ''}" data-act="cancel">${ui.confirm === 'cancel' ? 'Нажмите ещё раз, чтобы удалить эту тренировку' : 'Отменить тренировку'}</button>
+    </div>`;
+  return h;
+}
+function prevText(ton, prevTon, date) {
+  const d = ton - prevTon;
+  if (d > 0) return `Больше прошлой (${shortDate(date)}) на ${fmt(d)} кг`;
+  if (d === 0) return `Как в прошлый раз, ${shortDate(date)}`;
+  return `До прошлой (${shortDate(date)}, ${fmt(prevTon)} кг) осталось ${fmt(-d)} кг`;
+}
+
+function viewPlans() {
+  let h = '<h1>Планы</h1>';
+  if (!state.plans.length) h += '<p class="lead">Создайте план: список упражнений с подходами и повторениями. Потом из него запускается тренировка</p>';
+  h += '<div class="plan-list">' + state.plans.map(p => `
+    <button class="plan-card" data-act="edit-plan" data-id="${p.id}">
+      <span class="pb-name">${esc(p.name || 'Без названия')}</span>
+      <span class="sub">${p.exercises.length ? p.exercises.map(e => esc(e.name)).join(', ') : 'Упражнений пока нет'}</span>
+    </button>`).join('') + '</div>';
+  h += '<div class="stack" style="margin-top:14px"><button class="primary" data-act="new-plan">Новый план</button></div>';
+  return h;
+}
+
+function viewPlanEdit() {
+  const p = plan();
+  if (!p) { ui.editingPlanId = null; return viewPlans(); }
+  let h = `<button class="back" data-act="close-plan">${icoBack}Все планы</button>
+    <input class="title-input" data-field="plan-name" value="${esc(p.name)}" placeholder="Название плана" aria-label="Название плана">`;
+  if (!p.exercises.length) h += '<p class="lead">Добавьте первое упражнение ниже</p>';
+  p.exercises.forEach((e, i) => {
+    h += `<div class="pe">
+      <div class="pe-top">
+        <input class="pe-name" data-field="pe-name" data-i="${i}" value="${esc(e.name)}" list="ex-names" aria-label="Название упражнения">
+        ${i > 0 ? `<button class="tool" data-act="pe-up" data-i="${i}" aria-label="Выше">${icoUp}</button>` : ''}
+        ${i < p.exercises.length - 1 ? `<button class="tool" data-act="pe-down" data-i="${i}" aria-label="Ниже">${icoDown}</button>` : ''}
+        <button class="tool x" data-act="pe-del" data-i="${i}" aria-label="Удалить упражнение">${icoX}</button>
+      </div>
+      <div class="pe-bottom">
+        <div class="pe-group"><span class="sub">Подходы</span>
+          <div class="stepper"><button data-act="pe-sets" data-d="-1" data-i="${i}" aria-label="Меньше подходов">−</button><span class="num">${e.sets}</span><button data-act="pe-sets" data-d="1" data-i="${i}" aria-label="Больше подходов">+</button></div>
+        </div>
+        <div class="pe-group"><span class="sub">Повторения</span>
+          <div class="range">
+            <input class="cell sm num" inputmode="numeric" data-field="pe-min" data-i="${i}" value="${e.repsMin ?? ''}" aria-label="Повторений от">
+            <span class="sub">–</span>
+            <input class="cell sm num" inputmode="numeric" data-field="pe-max" data-i="${i}" value="${e.repsMax ?? ''}" aria-label="Повторений до">
+          </div>
+        </div>
+      </div>
+      <input class="pe-link" type="url" inputmode="url" autocapitalize="off" autocorrect="off" data-field="pe-video" data-i="${i}" value="${esc(e.video || '')}" placeholder="Ссылка на видео техники" aria-label="Ссылка на видео техники">
+    </div>`;
+  });
+  h += `<div class="add-row"><input id="pe-add" list="ex-names" placeholder="Название упражнения" enterkeyhint="done"><button class="primary sm" data-act="pe-add">Добавить</button></div>
+    <button class="danger-link ${ui.confirm === 'del-plan' ? 'armed' : ''}" data-act="del-plan">${ui.confirm === 'del-plan' ? 'Нажмите ещё раз, чтобы удалить план' : 'Удалить план'}</button>`;
+  return h;
+}
+
+function viewHistory() {
+  const list = finished();
+  let h = '<h1>История</h1>';
+  if (!list.length) return h + '<p class="lead">Здесь появятся завершённые тренировки с тоннажем по каждому упражнению</p>' + backupView();
+  let month = '';
+  list.forEach(s => {
+    const m = new Date(s.date).toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' });
+    if (m !== month) { month = m; h += `<div class="month">${m.charAt(0).toUpperCase() + m.slice(1)}</div>`; }
+    const open = ui.openSession === s.id;
+    h += `<article class="hist">
+      <button class="hist-head" data-act="toggle-hist" data-id="${s.id}" aria-expanded="${open}">
+        <span><span class="h-date" style="display:block">${longDate(s.date)}</span><span class="sub">${esc(s.planName || 'Без плана')}</span></span>
+        <span class="h-ton num">${fmt(sessTon(s))} кг</span>
+      </button>`;
+    if (open) {
+      h += '<div class="h-body">';
+      s.exercises.forEach(ex => {
+        const d = ex.sets.filter(x => x.done);
+        if (!d.length) return;
+        h += `<div class="h-ex"><div class="h-ex-top"><span>${esc(ex.name)}</span><span class="num">${fmt(exTon(ex))} кг</span></div><div class="h-sets num">${setsText(d)}</div></div>`;
+      });
+      const k = 'del-sess-' + s.id;
+      h += `<button class="danger-link ${ui.confirm === k ? 'armed' : ''}" data-act="del-sess" data-id="${s.id}">${ui.confirm === k ? 'Нажмите ещё раз, чтобы удалить' : 'Удалить тренировку'}</button></div>`;
+    }
+    h += '</article>';
+  });
+  return h + backupView();
+}
+
+function render() {
+  const y = window.scrollY;
+  let html;
+  if (tab === 'workout') html = viewWorkout();
+  else if (tab === 'plans') html = ui.editingPlanId ? viewPlanEdit() : viewPlans();
+  else html = viewHistory();
+  html += '<datalist id="ex-names">' + allNames().map(n => `<option value="${esc(n)}">`).join('') + '</datalist>';
+  document.getElementById('app').innerHTML = (ui.notice ? `<div class="notice">${esc(ui.notice)}</div>` : '') + html;
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('on', t.dataset.tab === tab));
+  if (ui.resetScroll) { window.scrollTo(0, 0); ui.resetScroll = false; } else window.scrollTo(0, y);
+  if (ui.restoreDraft) { const r = document.getElementById('restore-text'); if (r) r.value = ui.restoreDraft; }
+  if (ui.focusVid) { ui.focusVid = false; const v = document.getElementById('vid-input'); if (v) v.focus(); }
+}
+
+function updateTonnage() {
+  const s = active(); if (!s) return;
+  const ton = sessTon(s);
+  const el = document.getElementById('ton-total'); if (el) el.textContent = fmt(ton);
+  const ss = document.getElementById('ton-sets'); if (ss) ss.textContent = `${doneCount(s)} из ${totalCount(s)} подходов`;
+  s.exercises.forEach((ex, i) => { const e = document.getElementById('exton-' + i); if (e) e.textContent = fmt(exTon(ex)) + ' кг'; });
+  const prev = lastOfPlan(s.planId, s.id);
+  if (prev) {
+    const pt = sessTon(prev);
+    const bar = document.getElementById('ton-bar'); if (bar) bar.style.width = Math.min(100, ton / pt * 100) + '%';
+    const pr = document.getElementById('ton-prev'); if (pr) pr.textContent = prevText(ton, pt, prev.date);
+  }
+}
+
+/* ---------- Actions ---------- */
+function startWorkout(p) {
+  const s = {
+    id: uid(), date: Date.now(), finished: false,
+    planId: p ? p.id : null, planName: p ? p.name : '',
+    exercises: p ? p.exercises.map(e => ({
+      name: e.name,
+      target: { sets: e.sets, repsMin: e.repsMin, repsMax: e.repsMax },
+      sets: Array.from({ length: Math.max(1, e.sets || 1) }, () => ({ w: null, r: null, done: false }))
+    })) : []
+  };
+  state.sessions.push(s);
+  state.activeId = s.id;
+  ui.finishedId = null; ui.resetScroll = true;
+}
+function addExerciseToWorkout(name) {
+  const s = active(); if (!s || !name.trim()) return;
+  const last = lastFor(name, s.id);
+  const n = last ? last.sets.length : 3;
+  s.exercises.push({ name: name.trim(), target: {}, sets: Array.from({ length: n }, () => ({ w: null, r: null, done: false })) });
+}
+function addExerciseToPlan(name) {
+  const p = plan(); if (!p || !name.trim()) return;
+  p.exercises.push({ id: uid(), name: name.trim(), sets: 3, repsMin: 10, repsMax: 12 });
+}
+
+document.addEventListener('click', e => {
+  const a = e.target.closest('a.vid');
+  if (a && TG) {
+    e.preventDefault();
+    const u = a.getAttribute('href');
+    if (/^https:\/\/t\.me\//i.test(u)) TG.openTelegramLink(u); else TG.openLink(u);
+    return;
+  }
+  const b = e.target.closest('[data-act]');
+  if (!b) return;
+  const act = b.dataset.act;
+  const pending = ui.confirm; ui.confirm = null;
+  const s = active();
+  const p = plan();
+  const i = +b.dataset.i, ex = +b.dataset.ex;
+
+  switch (act) {
+    case 'tab': ui.videoEdit = null; tab = b.dataset.tab; ui.resetScroll = true; ui.editingPlanId = tab === 'plans' ? ui.editingPlanId : null; break;
+    case 'start': startWorkout(state.plans.find(x => x.id === b.dataset.id)); break;
+    case 'start-empty': startWorkout(null); break;
+    case 'toggle-set': {
+      const x = s.exercises[ex], st = x.sets[+b.dataset.set];
+      if (!st.done) {
+        const ph = placeholder(x, +b.dataset.set, s.id);
+        if (st.w == null && ph.w !== '') st.w = parseNum(ph.w);
+        if (st.r == null && ph.r !== '') st.r = parseNum(ph.r);
+      }
+      st.done = !st.done; break;
+    }
+    case 'add-set': { const x = s.exercises[ex]; const lastSet = x.sets[x.sets.length - 1]; x.sets.push({ w: lastSet ? lastSet.w : null, r: null, done: false }); break; }
+    case 'rm-set': s.exercises[ex].sets.pop(); break;
+    case 'rm-ex': if (pending === 'rm-ex-' + ex) s.exercises.splice(ex, 1); else ui.confirm = 'rm-ex-' + ex; break;
+    case 'add-ex': { const inp = document.getElementById('add-ex-input'); addExerciseToWorkout(inp.value); break; }
+    case 'finish':
+      s.exercises.forEach(x => x.sets = x.sets.filter(st => st.done || st.w != null || st.r != null).map(st => st));
+      s.finished = true; ui.finishedId = s.id; state.activeId = null; ui.resetScroll = true; break;
+    case 'cancel':
+      if (pending === 'cancel') { state.sessions = state.sessions.filter(x => x.id !== s.id); state.activeId = null; ui.resetScroll = true; }
+      else ui.confirm = 'cancel';
+      break;
+    case 'new-plan': { const np = { id: uid(), name: '', exercises: [] }; state.plans.push(np); ui.editingPlanId = np.id; ui.resetScroll = true; break; }
+    case 'edit-plan': ui.editingPlanId = b.dataset.id; ui.resetScroll = true; break;
+    case 'close-plan': ui.editingPlanId = null; ui.resetScroll = true; break;
+    case 'pe-up': if (i > 0) [p.exercises[i - 1], p.exercises[i]] = [p.exercises[i], p.exercises[i - 1]]; break;
+    case 'pe-down': if (i < p.exercises.length - 1) [p.exercises[i + 1], p.exercises[i]] = [p.exercises[i], p.exercises[i + 1]]; break;
+    case 'pe-del': p.exercises.splice(i, 1); break;
+    case 'pe-sets': p.exercises[i].sets = Math.max(1, Math.min(10, (p.exercises[i].sets || 1) + +b.dataset.d)); break;
+    case 'pe-add': { const inp = document.getElementById('pe-add'); addExerciseToPlan(inp.value); break; }
+    case 'del-plan':
+      if (pending === 'del-plan') { state.plans = state.plans.filter(x => x.id !== p.id); ui.editingPlanId = null; ui.resetScroll = true; }
+      else ui.confirm = 'del-plan';
+      break;
+    case 'vid-edit': ui.videoEdit = ex; ui.focusVid = true; break;
+    case 'vid-save': setVideo(s.exercises[ex].name, document.getElementById('vid-input').value); ui.videoEdit = null; break;
+    case 'backup-copy': {
+      const txt = JSON.stringify(state);
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(txt).then(() => toast('Копия скопирована, вставьте её в Заметки', true)).catch(() => { ui.copyFallback = true; render(); });
+      } else ui.copyFallback = true;
+      break;
+    }
+    case 'backup-open': ui.restoreOpen = !ui.restoreOpen; ui.copyFallback = false; break;
+    case 'backup-restore': {
+      const el = document.getElementById('restore-text');
+      const raw = el ? el.value.trim() : '';
+      let data = null;
+      try { data = JSON.parse(raw); } catch (err) { }
+      if (!data || !Array.isArray(data.plans) || !Array.isArray(data.sessions)) { toast('Это не похоже на резервную копию: вставьте текст целиком'); ui.restoreDraft = raw; break; }
+      if (pending !== 'restore') { ui.confirm = 'restore'; ui.restoreDraft = raw; break; }
+      state = Object.assign({ plans: [], sessions: [], activeId: null }, data);
+      ui.restoreOpen = false; ui.restoreDraft = ''; ui.notice = '';
+      toast('Данные восстановлены', true);
+      break;
+    }
+    case 'toggle-hist': ui.openSession = ui.openSession === b.dataset.id ? null : b.dataset.id; break;
+    case 'del-sess': {
+      const k = 'del-sess-' + b.dataset.id;
+      if (pending === k) state.sessions = state.sessions.filter(x => x.id !== b.dataset.id);
+      else ui.confirm = k;
+      break;
+    }
+  }
+  if (!['tab', 'toggle-hist', 'edit-plan', 'close-plan'].includes(act) || act === 'close-plan') save();
+  render();
+});
+
+document.addEventListener('input', e => {
+  const el = e.target, f = el.dataset && el.dataset.field;
+  if (!f) return;
+  if (f === 'w' || f === 'r') {
+    const s = active(); if (!s) return;
+    const st = s.exercises[+el.dataset.ex].sets[+el.dataset.set];
+    st[f] = el.value.trim() === '' ? null : parseNum(el.value);
+    updateTonnage();
+  } else if (f === 'plan-name') {
+    plan().name = el.value;
+  } else {
+    const pe = plan().exercises[+el.dataset.i];
+    if (f === 'pe-name') pe.name = el.value;
+    if (f === 'pe-min') pe.repsMin = parseNum(el.value);
+    if (f === 'pe-max') pe.repsMax = parseNum(el.value);
+    if (f === 'pe-video') { const nm = norm(pe.name); state.videos = state.videos || {}; if (el.value.trim()) state.videos[nm] = el.value.trim(); else delete state.videos[nm]; pe.video = el.value.trim(); }
+  }
+  save();
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Enter') return;
+  if (e.target.id === 'vid-input') { const s = active(); setVideo(s.exercises[+e.target.dataset.ex].name, e.target.value); ui.videoEdit = null; save(); render(); }
+  else if (e.target.id === 'add-ex-input') { addExerciseToWorkout(e.target.value); save(); render(); }
+  else if (e.target.id === 'pe-add') { addExerciseToPlan(e.target.value); save(); render(); setTimeout(() => { const n = document.getElementById('pe-add'); if (n) n.focus(); }, 0); }
+  else if (e.target.classList.contains('cell')) e.target.blur();
+});
+
+if (TG) {
+  TG.ready();
+  TG.expand();
+  try { if (TG.isVersionAtLeast('6.1')) { TG.setHeaderColor('#E6E9E4'); TG.setBackgroundColor('#E6E9E4'); } } catch (e) { }
+  try { if (TG.isVersionAtLeast('7.7')) TG.disableVerticalSwipes(); } catch (e) { }
+}
+load();
+</script>
+</body>
+</html>
